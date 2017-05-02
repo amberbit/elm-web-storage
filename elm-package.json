@@ -1,13 +1,13 @@
 {
     "version": "1.0.0",
-    "summary": "Persistent cache, exposing the localStorage browser API",
-    "repository": "http://github.com/elm-lang/persistent-cache.git",
+    "summary": "Web Storage API bindings, exposing the localStorage and sessionStorage APIs",
+    "repository": "http://github.com/amberbit/elm-web-storage.git",
     "license": "BSD3",
     "source-directories": [
         "src"
     ],
     "exposed-modules": [
-        "PersistentCache"
+        "LocalStorage"
     ],
     "native-modules": true,
     "dependencies": {
