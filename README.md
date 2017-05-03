@@ -13,27 +13,21 @@ so it is not 100% reliable.
 
 ## Installation
 
-Install [elm-github-install](https://github.com/gdotdesign/elm-github-install) with:
+In your `elm-package.json`:
+
+```json
+  "dependencies": {
+    "amberbit/elm-web-storage": "0.0.1 <= v < 0.1.0"
+  },
+```
+
+Install [elm-github-install](https://github.com/gdotdesign/elm-github-install) according to instructions or with:
 
 ```sh
 gem install elm_install
 ```
 
-In your `elm-package.json`:
-
-```json
-  "dependencies": {
-    "amberbit/elm-web-storage": "1.0.0 <= v < 2.0.0"
-  },
-  "dependency-sources": {
-    "amberbit/elm-web-storage": {
-      "url": "https://github.com/amberbit/elm-web-storage.git",
-      "ref": "master"
-    }
-  }
-```
-
-Run the installer:
+Download packages:
 
 ```sh
 cd elm-project
