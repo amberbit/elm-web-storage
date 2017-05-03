@@ -55,21 +55,25 @@ function remove(key)
 	});
 }
 
-var clear = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-{
-	localStorage.clear();
-	callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
-});
-
-var keys = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-{
-	var keyList = _elm_lang$core$Native_List.Nil;
-	for (var i = localStorage.length; i--; )
+function clear() {
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
 	{
-		keyList = _elm_lang$core$Native_List.Cons(localStorage.key(i), keyList);
-	}
-	callback(_elm_lang$core$Native_Scheduler.succeed(keyList));
-});
+		localStorage.clear();
+		callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
+	});
+}
+
+function keys() {
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		var keyList = _elm_lang$core$Native_List.Nil;
+		for (var i = localStorage.length; i--; )
+		{
+			keyList = _elm_lang$core$Native_List.Cons(localStorage.key(i), keyList);
+		}
+		callback(_elm_lang$core$Native_Scheduler.succeed(keyList));
+	});
+}
 
 return {
 	get: get,
