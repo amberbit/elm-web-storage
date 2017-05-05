@@ -9,15 +9,16 @@ if (!localStorage || !localStorage.getItem || !localStorage.setItem)
 	}
 
 	return {
-		get: disabled,
-		set: F2(disabled),
-		remove: disabled,
-		clear: disabled(),
-		keys: disabled()
+		getItem: disabled,
+		setItem: F2(disabled),
+		removeItem: disabled,
+		clear: disabled,
+		key: disabled,
+		length: disabled
 	};
 }
 
-function get(key)
+function getItem(key)
 {
 	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
 	{
@@ -30,7 +31,7 @@ function get(key)
 	});
 }
 
-function set(key, value)
+function setItem(key, value)
 {
 	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
 	{
@@ -41,12 +42,13 @@ function set(key, value)
 		}
 		catch (e)
 		{
-			return callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'QuotaExceeded' }));
+			// TODO check exception type
+			callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'QuotaExceeded' }));
 		}
 	});
 }
 
-function remove(key)
+function removeItem(key)
 {
 	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
 	{
@@ -63,24 +65,33 @@ function clear() {
 	});
 }
 
-function keys() {
+function key(index) {
 	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
 	{
-		var keyList = _elm_lang$core$Native_List.Nil;
-		for (var i = localStorage.length; i--; )
-		{
-			keyList = _elm_lang$core$Native_List.Cons(localStorage.key(i), keyList);
-		}
-		callback(_elm_lang$core$Native_Scheduler.succeed(keyList));
+		var keyName = localStorage.key(index);
+		callback(_elm_lang$core$Native_Scheduler.succeed(
+			keyName === null
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(keyName)
+		));
+	});
+}
+
+function length() {
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		var length = localStorage.length;
+		callback(_elm_lang$core$Native_Scheduler.succeed(length));
 	});
 }
 
 return {
-	get: get,
-	set: F2(set),
-	remove: remove,
+	getItem: getItem,
+	setItem: F2(setItem),
+	removeItem: removeItem,
 	clear: clear,
-	keys: keys
+	key: key,
+	length: length
 };
 
 }();

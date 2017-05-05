@@ -1,10 +1,11 @@
 module LocalStorage
     exposing
-        ( get
-        , set
-        , remove
+        ( length
+        , key
+        , getItem
+        , setItem
+        , removeItem
         , clear
-        , keys
         , Error(..)
         )
 
@@ -15,12 +16,12 @@ module LocalStorage
 
 # Storage
 
-@docs get, set, remove, Error
+@docs getItem, setItem, removeItem, length, key, Error
 
 
 # Curate your Storage
 
-@docs clear, keys
+@docs clear
 
 -}
 
@@ -30,8 +31,8 @@ import Task exposing (Task)
 
 {-| These low-level operations can fail in a few ways:
 
-  - `QuotaExceeded` means you exceeded your 5mb and need to `clear` or `remove`
-    some information to make more space.
+  - `QuotaExceeded` means you exceeded your 5MB and need to `clear` or
+    `removeItem` some information to make more space.
   - `Disabled` means the user turned off local storage. It is rare, but it can
     happen.
 
@@ -41,51 +42,57 @@ type Error
     | Disabled
 
 
+{-| Get an integer representing the number of data items stored.
+-}
+length : Task Error Int
+length =
+    Native.LocalStorage.length ()
+
+
+{-| When passed a number n, this function will return the name of the nth key in
+the storage.
+-}
+key : Int -> Task Error (Maybe String)
+key =
+    Native.LocalStorage.key
+
+
 {-| Get the value at a particular key.
 
-    get "age"
+    getItem "age"
 
 -}
-get : String -> Task Error (Maybe String)
-get =
-    Native.LocalStorage.get
+getItem : String -> Task Error (Maybe String)
+getItem =
+    Native.LocalStorage.getItem
 
 
 {-| Set a key to a particular value. If the key does not exist, it is added.
 If the key already exists, we overwrite the old data.
 
-    set "age" "42"
+    setItem "age" "42"
 
 Most browsers cap you at 5MB of space, so this can trigger a `QuotaExceeded`
 error if you are adding enough data to cross that threshold.
 
 -}
-set : String -> String -> Task Error ()
-set =
-    Native.LocalStorage.set
+setItem : String -> String -> Task Error ()
+setItem =
+    Native.LocalStorage.setItem
 
 
 {-| Remove a particular key and its corresponding value.
 
-    remove "age"
+    removeItem "age"
 
 -}
-remove : String -> Task Error ()
-remove =
-    Native.LocalStorage.remove
+removeItem : String -> Task Error ()
+removeItem =
+    Native.LocalStorage.removeItem
 
 
 {-| Remove everything in local storage.
 -}
 clear : Task Error ()
 clear =
-    Native.LocalStorage.clear
-
-
-{-| Get all the keys currently stored. So if you `set` two entries named
-`"draft"` and `"title"`, running the `keys` task will produce
-`["draft", "title"]`. If you have not `set` any entries yet, you will get `[]`.
--}
-keys : Task Error (List String)
-keys =
-    Native.LocalStorage.keys
+    Native.LocalStorage.clear ()
