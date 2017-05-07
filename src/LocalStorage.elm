@@ -31,30 +31,36 @@ import Task exposing (Task)
 
 {-| These low-level operations can fail in a few ways:
 
-  - `QuotaExceeded` means you exceeded your 5MB and need to `clear` or
-    `removeItem` some information to make more space.
-  - `Disabled` means the user turned off local storage. It is rare, but it can
-    happen.
+  - `QuotaExceeded` means you exceeded your storage space limit and need to
+    `clear` or `removeItem` some information.
+  - `NotAvailable` means the user turned off localStorage or browser doesn't
+    support it. It is rare, but it can happen.
 
 -}
 type Error
     = QuotaExceeded
-    | Disabled
+    | NotAvailable
 
 
 {-| Get an integer representing the number of data items stored.
 -}
 length : Task Error Int
 length =
-    Native.LocalStorage.length ()
+    if Native.LocalStorage.available () then
+        Native.LocalStorage.length ()
+    else
+        Task.fail NotAvailable
 
 
 {-| When passed a number n, this function will return the name of the nth key in
 the storage.
 -}
 key : Int -> Task Error (Maybe String)
-key =
-    Native.LocalStorage.key
+key index =
+    if Native.LocalStorage.available () then
+        Native.LocalStorage.key index
+    else
+        Task.fail NotAvailable
 
 
 {-| Get the value at a particular key.
@@ -63,8 +69,11 @@ key =
 
 -}
 getItem : String -> Task Error (Maybe String)
-getItem =
-    Native.LocalStorage.getItem
+getItem key =
+    if Native.LocalStorage.available () then
+        Native.LocalStorage.getItem key
+    else
+        Task.fail NotAvailable
 
 
 {-| Set a key to a particular value. If the key does not exist, it is added.
@@ -77,8 +86,11 @@ error if you are adding enough data to cross that threshold.
 
 -}
 setItem : String -> String -> Task Error ()
-setItem =
-    Native.LocalStorage.setItem
+setItem key value =
+    if Native.LocalStorage.available () then
+        Native.LocalStorage.setItem key value
+    else
+        Task.fail NotAvailable
 
 
 {-| Remove a particular key and its corresponding value.
@@ -87,12 +99,18 @@ setItem =
 
 -}
 removeItem : String -> Task Error ()
-removeItem =
-    Native.LocalStorage.removeItem
+removeItem key =
+    if Native.LocalStorage.available () then
+        Native.LocalStorage.removeItem key
+    else
+        Task.fail NotAvailable
 
 
 {-| Remove everything in local storage.
 -}
 clear : Task Error ()
 clear =
-    Native.LocalStorage.clear ()
+    if Native.LocalStorage.available () then
+        Native.LocalStorage.clear ()
+    else
+        Task.fail NotAvailable

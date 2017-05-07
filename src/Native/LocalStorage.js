@@ -1,97 +1,143 @@
 
 var _amberbit$elm_web_storage$Native_LocalStorage = function() {
 
-if (!localStorage || !localStorage.getItem || !localStorage.setItem)
-{
-	function disabled()
-	{
-		return _elm_lang$core$Native_Scheduler.fail({ ctor: 'Disabled' });
-	}
+  function quotaWasExceeded(e)
+  {
+    return e instanceof DOMException && (
+      // everything except Firefox
+      e.code === 22 ||
+      // Firefox
+      e.code === 1014 ||
+      // test name field too, because code might not be present
+      // everything except Firefox
+      e.name === 'QuotaExceededError' ||
+      // Firefox
+      e.name === 'NS_ERROR_DOM_QUOTA_REACHED');
+  }
 
-	return {
-		getItem: disabled,
-		setItem: F2(disabled),
-		removeItem: disabled,
-		clear: disabled,
-		key: disabled,
-		length: disabled
-	};
-}
+  // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API#Feature-detecting_localStorage
+  function storageAvailable(type)
+  {
+    try
+    {
+      var storage = window[type],
+      x = '__storage_test__';
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+    }
+    catch(e)
+    {
+      return quotaWasExceeded(e) &&
+      // acknowledge QuotaExceededError only if there's something already
+      // stored
+      storage.length !== 0;
+    }
+  }
 
-function getItem(key)
-{
-	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-	{
-		var value = localStorage.getItem(key);
-		callback(_elm_lang$core$Native_Scheduler.succeed(
-			value === null
-				? _elm_lang$core$Maybe$Nothing
-				: _elm_lang$core$Maybe$Just(value)
-		));
-	});
-}
+  function localStorageAvailable()
+  {
+    return storageAvailable('localStorage');
+  }
 
-function setItem(key, value)
-{
-	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-	{
-		try
-		{
-			localStorage.setItem(key, value);
-			return callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
-		}
-		catch (e)
-		{
-			// TODO check exception type
-			callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'QuotaExceeded' }));
-		}
-	});
-}
+  function toMaybe(value)
+  {
+    return value === null
+    ? _elm_lang$core$Maybe$Nothing
+    : _elm_lang$core$Maybe$Just(value);
+  }
 
-function removeItem(key)
-{
-	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-	{
-		localStorage.removeItem(key);
-		callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
-	});
-}
+  function nativeBinding(fn)
+  {
+    return _elm_lang$core$Native_Scheduler.nativeBinding(fn);
+  }
 
-function clear() {
-	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-	{
-		localStorage.clear();
-		callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
-	});
-}
+  function succeed(v)
+  {
+    return _elm_lang$core$Native_Scheduler.succeed(v);
+  }
 
-function key(index) {
-	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-	{
-		var keyName = localStorage.key(index);
-		callback(_elm_lang$core$Native_Scheduler.succeed(
-			keyName === null
-				? _elm_lang$core$Maybe$Nothing
-				: _elm_lang$core$Maybe$Just(keyName)
-		));
-	});
-}
+  function unit()
+  {
+    return _elm_lang$core$Native_Utils.Tuple0;
+  }
 
-function length() {
-	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-	{
-		var length = localStorage.length;
-		callback(_elm_lang$core$Native_Scheduler.succeed(length));
-	});
-}
+  function getItem(key)
+  {
+    return nativeBinding(function(callback)
+    {
+      var value = localStorage.getItem(key);
+      callback(succeed(toMaybe(value)));
+    });
+  }
 
-return {
-	getItem: getItem,
-	setItem: F2(setItem),
-	removeItem: removeItem,
-	clear: clear,
-	key: key,
-	length: length
-};
+  function setItem(key, value)
+  {
+    return nativeBinding(function(callback)
+    {
+      try
+      {
+        localStorage.setItem(key, value);
+        callback(succeed(unit()));
+      }
+      catch (e)
+      {
+        if (quotaWasExceeded(e))
+        {
+          callback(_elm_lang$core$Native_Scheduler.fail({ctor: 'QuotaExceeded'}));
+        }
+        else
+        {
+          _elm_lang$core$Native_Debug.crash('This is an unexpected error from elm-web-storage package. Please report an issue. Details: ' + e);
+        }
+      }
+    });
+  }
+
+  function removeItem(key)
+  {
+    return nativeBinding(function(callback)
+    {
+      localStorage.removeItem(key);
+      callback(succeed(unit()));
+    });
+  }
+
+  function clear()
+  {
+    return nativeBinding(function(callback)
+    {
+      localStorage.clear();
+      callback(succeed(unit()));
+    });
+  }
+
+  function length()
+  {
+    return nativeBinding(function(callback)
+    {
+      var length = localStorage.length;
+      callback(succeed(length));
+    });
+  }
+
+  function key(index)
+  {
+    return nativeBinding(function(callback)
+    {
+      var keyName = localStorage.key(index);
+      callback(succeed(toMaybe(keyName)));
+    });
+  }
+
+  return {
+    available: localStorageAvailable,
+    getItem: getItem,
+    setItem: F2(setItem),
+    removeItem: removeItem,
+    clear: clear,
+    key: key,
+    length: length
+  };
 
 }();

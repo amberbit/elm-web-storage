@@ -1,7 +1,9 @@
 # Elm Web Storage
 
 Store values in a user's browser with Web Storage API: window.localStorage and
-window.sessionStorage.
+window.sessionStorage. This package is especially suitable for long-running
+apps, because it properly handles changes to Web Storage availablily. This can
+change when user changes browser settings or installs various privacy add-ons.
 
 > **Note:** sessionStorage support is in progress.
 
@@ -68,20 +70,17 @@ so you cannot store 5MB into localStorage and then 5MB into sessionStorage.
 Users can also clear all this storage in their browser settings or disable it
 completely, so it is not 100% reliable.
 
+This package does a thorough job of testing for storage availability, even if it
+changes while your app is running.
 
-Package documentation: currently the best source of information are the example
-and test app.
+Package documentation: currently it isn't published anywhere. The best source is
+[LocalStorage.elm](https://github.com/amberbit/elm-web-storage/blob/master/src/LocalStorage.elm)
 
 Web API documentation
 * [Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API)
 * [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
 * [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage)
 
-
-## Debugging/troubleshooting
-
-Use an app in `/test` to run integration tests in your browser and open an issue
-with output. Pull requests are welcome.
 
 ## Justification
 
@@ -91,6 +90,7 @@ implementation each time and do error handling on their own. That can lead to JS
 runtime errors and loss of tribal experience with Web Storage APIs and Elm. This
 repository aims to collect that knowledge and hopefully make it easier to add
 direct support for this part of Web API in Elm.
+
 
 ## Note
 
