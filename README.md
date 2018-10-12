@@ -5,7 +5,12 @@ window.sessionStorage. This package is especially suitable for long-running
 apps, because it properly handles changes to Web Storage availablily. This can
 change when user changes browser settings or installs various privacy add-ons.
 
-> **Note:** sessionStorage support is in progress.
+> **Note:** sessionStorage support may be implemented one day. PRs welcome.
+
+## Requirements
+
+* Elm 0.18
+* elm-github-install
 
 ## Example
 
@@ -13,22 +18,25 @@ Full example based on TODOMVC available in [/example](https://github.com/amberbi
 ```elm
 import LocalStorage
 
-type alias Msg =
-    TokenAvailable (Result LocalStorage.Error (Maybe String))
+type Msg
+    = TokenAvailable (Result LocalStorage.Error (Maybe String))
     | TokenForgotten (Result LocalStorage.Error ())
     | TokenStored (Result LocalStorage.Error ())
 
-getToken : Task LocalStorage.Error (Maybe String) -> Cmd Msg
+
+getToken : Cmd Msg
 getToken =
     LocalStorage.getItem "token"
         |> Task.attempt TokenAvailable
 
-setToken : String -> Task LocalStorage.Error () -> Cmd Msg
+
+setToken : String -> Cmd Msg
 setToken token =
     LocalStorage.setItem "token" token
         |> Task.attempt TokenStored
 
-forgetToken : Task LocalStorage.Error () -> Cmd Msg
+
+forgetToken : Cmd Msg
 forgetToken =
     LocalStorage.removeItem "token"
         |> Task.attempt TokenForgotten
